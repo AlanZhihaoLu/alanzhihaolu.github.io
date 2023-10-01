@@ -1,0 +1,9 @@
+.current {
+    color: green;
+  }
+
+pre.highlight {
+  padding: 5px;
+  border: 1px solid black;
+  border-radius: 5px;
+}
