@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scene Gist</title>
+    <script src="src/jspsych-6.1.0/jspsych.js"></script>
+    <script src="src/jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="src/jspsych-6.1.0/plugins/jspsych-image-keyboard-response.js"></script>
+    <script src="src/input/basic_B_g1_Consistent.js"></script>
+    <script src="src/input/additional_stimuli.js"></script>
+    <link href="src/jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+  </head>
+  <body>
+    <div>
+        <span style="font-size: 24px;">
+            <br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;If you are seeing this message for <span style="color: rgb(255, 0, 0);"><b>more than 5 minutes</b></span>,<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;please screen-capture this screen and send the image to us.
+            <br><br>
+            <span style="font-size: 28px;">&nbsp;&nbsp;&nbsp;&nbsp;We are very sorry for the inconvenience.</span>
+        </span>
+    </div>
+    <style>
+      #display_stage_background {
+          width: 100vw;
+          background-color: white;
+          z-index: -1;
+      }
+  
+      #display_stage {
+          position: fixed;
+          left: 0vw;
+          top: 0vh;
+          height: 100vh;
+          width: 100vw;
+          background-color: white;
+          z-index: 0;
+          overflow-y: hidden;
+          overflow-x: hidden;
+      }
+          
+  </style>
+  <div id='display_stage_background'></div>
+  <div id='display_stage'></div>
+  </body>
+  <script>
+
+    var timeline = [];
+
+    var test_stimuli = raw_stimuli;
+
+    for (i = 0; i < attention_checks.length; i++) {
+    test_stimuli.splice(6+(13*i), 0, attention_checks[i])
+    }
+
+    var welcome = {
+        type: "html-keyboard-response",
+        stimulus: "<h3>Welcome to the experiment!</h3>" + 
+        "<p>We thank you for your participation.</p>" +
+        "<p><em>Press any key to start.</em></p>",
+        data: {
+            on_screen: 'welcome'
+        }
+    };
+    timeline.push(welcome);
+
+    var introduction = {
+        type: "html-keyboard-response",
+        stimulus: "<p>In this experiment, you will be answering questions on briefly presented scene images.</p>" +
+        "<p>First, let's first run through an example practice trial.</p>" +
+        "<p><em>Press any key to continue.</em></p>",
+        data: {
+            on_screen: 'introduction'
+        }
+    }
+    timeline.push(introduction);
+
+    var instr_fixation = {
+        type: 'html-keyboard-response',
+        stimulus: "<p>(1) First, you will see a fixation cross, which looks like this:</p>" +
+        '<div style="font-size:60px;">+</div>' + 
+        "<p>Please keep your eyes on it while it's there!</p>" +
+        '<p><em>Press "3" to continue.</em></p>',
+        choices: ['3'],
+        data: {
+            on_screen: 'instr_fixation'
+        }
+    }
+    var instr_scene_image = {
+        type: "html-keyboard-response",
+        stimulus: function(){
+        var inverted = (jsPsych.timelineVariable('Inverted', true) === "Yes") ? 'style="transform: scaleY(-1);"' : '';
+        var scene_image = jsPsych.timelineVariable('SceneImage', true);
+        var html = '<p>(2) Next, a scene image will briefly appear in the center of the screen, like this one.</p>' +
+            '<img ' + inverted + ' src="src/img/' + 
+            scene_image + 
+            '" alt="' + 
+            scene_image + 
+            '" width="500" height=auto>' +
+            '<p><em>Press "5" to continue.</em></p>'
+        return html
+        },
+        choices: ['5'],
+        data: {on_screen: 'instr_scene_image', 
+            SceneImage: jsPsych.timelineVariable('SceneImage')
+        }
+    }
+    var instr_scene_image_inverted = {
+        type: "html-keyboard-response",
+        stimulus: function(){
+        var scene_image = jsPsych.timelineVariable('SceneImage', true);
+        var html = '<p>(2, continued) They will also sometimes appear upside-down, like this:</p>' +
+            '<img style="transform: scaleY(-1);" src="src/img/' + 
+            scene_image + 
+            '" alt="' + 
+            scene_image + 
+            '" width="500" height=auto>' +
+            '<p><em>Press "8" to continue.</em></p>'
+        return html
+        },
+        choices: ['8'],
+        data: {
+            on_screen: 'instr_scene_image_inverted', 
+            SceneImage: jsPsych.timelineVariable('SceneImage')
+        }
+    }
+    var instr_mask = {
+        type: "html-keyboard-response",
+        stimulus: '<p>(3) After that, you will see a noisy "pattern" flash on the screen, like this:</p>' + 
+            `<img src="src/img/NoiseMask.jpg" alt="Noise Mask" width="500" height=auto>` +
+            '<p><em>Press "9" to continue.</em></p>',
+        choices: ['9'],
+        data: {
+            on_screen: 'instr_mask'
+        }
+    }
+    var instr_question = {
+        type: 'html-keyboard-response',
+        stimulus: function(){
+            var html = "<p>(4) Finally, a word describing an object will appear on the screen. In this case, the word is <b>" + jsPsych.timelineVariable('probe', true) + "</b>.<br>" +
+            "Please use your keyboard to answer whether the object was present in the scene image shown in (2).<br>" + 
+            'If you think the object was present in the scene image, press "1".<br>' +
+            'Otherwise, if you think the object was not present in the scene image, press "2".<br>' +
+            "Don't worry if you aren't able to tell for sure! Just make your best guess.</p><br>" +
+            '<h1>' + jsPsych.timelineVariable('probe', true) + '</h1><br><br>' +
+            '<h3>"yes" or "no"<br>1 &nbsp; &nbsp; or &nbsp; &nbsp;2</h3><br><br>' +
+            '<p><em>Press "1" or "2" to continue.</em></p>'
+            return html
+        },
+        choices: ['1', '2'],
+        data: {
+            on_screen: 'instr_question', 
+            probe: jsPsych.timelineVariable('probe')
+        }
+    }
+    var instr_end = {
+        type: "html-keyboard-response",
+        stimulus: "<p>Great!</p>" +
+        "<p>Now let's see what it looks like all put together!</p>" +
+        '<p><em>Press any key to continue.</em></p>',
+        data: {
+            on_screen: 'instr_end'
+        }
+    };
+    var instructions = {
+        timeline: [instr_fixation, instr_scene_image, instr_scene_image_inverted, instr_mask, instr_question, instr_end],
+        timeline_variables: practice_stimuli
+    }
+    timeline.push(instructions);
+
+    var fixation = {
+        type: 'html-keyboard-response',
+        stimulus: '<div style="font-size:60px;">+</div>',
+        choices: jsPsych.NO_KEYS,
+        trial_duration: 2000
+    }
+    var scene_image = {
+        type: "html-keyboard-response",
+        stimulus: function(){
+        var inverted = (jsPsych.timelineVariable('Inverted', true) === "Yes") ? 'style="transform: scaleY(-1);"' : '';
+        var scene_image = jsPsych.timelineVariable('SceneImage', true)
+        var html = '<img ' + inverted + ' src="src/img/' + 
+            scene_image + 
+            '" alt="' + 
+            scene_image + 
+            '" width="500" height=auto>'
+        return html
+        },
+        choices: jsPsych.NO_KEYS,
+        trial_duration: jsPsych.timelineVariable('Duration')
+    }
+    var mask = {
+        type: "html-keyboard-response",
+        stimulus: `<img src="src/img/NoiseMask.jpg" alt="Noise Mask" width="500" height=auto>`,
+        choices: jsPsych.NO_KEYS,
+        trial_duration: 50
+    }
+    var question = {
+        type: 'html-keyboard-response',
+        stimulus: function(){
+          var html = '<br><br><h1>' + jsPsych.timelineVariable('probe', true) + '</h1><br><br>' +
+          '<h3>"yes" or "no"<br>1 &nbsp; &nbsp; or &nbsp; &nbsp;2</h3><br><br>'
+          return html
+        },
+        choices: ['1', '2'],
+    }
+    var example_trial = {
+        timeline: [fixation, scene_image, mask, question],
+        timeline_variables: practice_stimuli
+    }
+    timeline.push(example_trial);
+
+    var practice_end = {
+        type: "html-keyboard-response",
+        stimulus: "<p>How was that? As you can see, each trial is pretty short.</p>" +
+        "<p>In the main experiment, the next trial will start automatically as soon as you enter your response.</p>" +
+        "<p>Try not to lose focus, and please answer quickly and as accurately as possible throughout the experiment.</p>" +
+        "<p>Please note that, although speed is valued, <b>accuracy is most important.</b></p>" +
+        '<p><em>Press "7" to acknowledge this message and continue to the main experiment.</em></p>',
+        choices: ['7']
+    }
+    timeline.push(practice_end);
+
+    var start_note = {
+        type: "html-keyboard-response",
+        stimulus: "<p>We will now begin the experiment.</p>" +
+        "<p>Remember to be as accurate as possible with your responses.</p>" + 
+        '<p><em>Press "1" to start the main experiment.</em></p>',
+        choices: ['1'],
+        data: {
+            on_screen: 'start_note'
+        }
+    }
+    timeline.push(start_note);
+
+    var procedure = {
+        timeline: [fixation, scene_image, mask, question],
+        timeline_variables: test_stimuli
+    }
+    timeline.push(procedure);
+
+    var end_note = {
+      type: "html-keyboard-response",
+      stimulus: "<p>You have completed the experiment. Thank you!</p>"
+    }
+    timeline.push(end_note);
+
+    var images = ['src/img/NoiseMask.jpg', 
+    'src/img/basketball_net.jpg',
+    test_stimuli.map(a => `src/img/${a.SceneImage}`)]
+
+    jsPsych.init({
+      timeline: timeline,
+      preload_images: images,
+      display_element: 'display_stage'
+    });
+  </script>
+</html>
